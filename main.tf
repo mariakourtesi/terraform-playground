@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_launch_configuration" "example" {
-    ami = "ami-0c55b159cbfafe1f0"
+    image_id = "ami-0c55b159cbfafe1f0"
     instance_type = "t2.micro"
     security_groups = [aws_security_group.instance.id]
 
@@ -51,6 +51,7 @@ resource "aws_lb" "example" {
     name               = "terraform-asg-example"
     load_balancer_type = "application"
     subnets            = "data.aws_subnet_ids.default.ids"
+    security_groups    = [aws_security_group.alb.id]
 }
 
 resource "aws_lb_listener" "http" {
@@ -69,6 +70,45 @@ resource "aws_lb_listener" "http" {
         }
     }
 }
+
+resource "aws_security_group" "alb"{
+        name = "terraform-example-alb"
+
+        # Allow all outbound requests
+        ingerss {
+            from_port   = 80
+            to_port     = 80
+            protocol    = "tcp"
+            cidr_blocks = ["0.0.0.0/0"]
+        }
+
+        # Allow all outbound requests
+        egress {
+            from_port   = 0
+            to_port     = 0
+            protocol    = "-1"
+            cidr_blocks = ["0.0.0.0/0"]
+
+        }
+}
+
+resource "aws_lb_target_group" "asg" {
+    name = "terraform-asg-example"
+    port = var.server_port
+    protocol = "HTTP"
+    vpc_id = data.aws_vpc.default.id
+
+    health_check {
+        path = "/"
+        protocol = "HTTP"
+        matcher = "200"
+        interval = 15
+        timeout = 3
+        healthy_threshold = 2
+        unhealthy_threshold = 2
+    }
+}
+
 data "aws_vpc" "default" {
     default = true
 }
