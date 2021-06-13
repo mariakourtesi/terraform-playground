@@ -37,6 +37,9 @@ resource "aws_autoscaling_group" "example" {
     launch_configuration = aws_launch_configuration.example.name
     vpc_zone_identifier  = data.aws_subnet_ids.default.ids
 
+    target_group_arns = [aws_lb_target_group.asg.arn]
+    health_check_type = "ELB"
+
     min_size = 2
     max_size = 10
 
@@ -71,10 +74,26 @@ resource "aws_lb_listener" "http" {
     }
 }
 
+resource "aws_lb_listener_rule" "asg" {
+    listener_arn = aws_lb_listener.http.arn
+    priority = 100
+
+    condition {
+        path_pattern {
+            values = ["*"]
+        }
+    }
+
+    action {
+        type    = "forward"
+        target_group_arn = aws_lb_target_group.asg.arn
+    }
+}
+
 resource "aws_security_group" "alb"{
         name = "terraform-example-alb"
 
-        # Allow all outbound requests
+        # Allow all inbound requests
         ingerss {
             from_port   = 80
             to_port     = 80
