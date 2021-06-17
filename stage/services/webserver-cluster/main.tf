@@ -138,6 +138,6 @@ data "aws_subnet_ids" "default" {
 
 terraform {
     backend "s3" {
-        key = "global/s3/terraform.tfstate"
+        key = "stage/services/webserver-cluster/terraform.tfstate"
     }
 }
