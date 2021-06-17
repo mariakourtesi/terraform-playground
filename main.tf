@@ -136,3 +136,8 @@ data "aws_subnet_ids" "default" {
     vpc_id = data.aws_vpc.default.id
 }
 
+terraform {
+    backend "s3" {
+        key = "global/s3/terraform.tfstate"
+    }
+}
