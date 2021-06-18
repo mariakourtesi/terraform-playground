@@ -1,6 +1,6 @@
 resource "aws_launch_configuration" "example" {
     image_id = "ami-0c55b159cbfafe1f0"
-    instance_type = "t2.micro"
+    instance_type = var.instance_type
     security_groups = [aws_security_group.instance.id]
 
     user_data = data.template_file.user_data.rendered
@@ -10,7 +10,7 @@ lifecycle {
     create_before_destroy = true
 }
     tags = {
-        Name = "terraform-example"
+        Name = "${var.cluster_name}"
     }
 }
 
@@ -32,8 +32,8 @@ resource "aws_autoscaling_group" "example" {
     target_group_arns = [aws_lb_target_group.asg.arn]
     health_check_type = "ELB"
 
-    min_size = 2
-    max_size = 10
+    min_size = var.min_size
+    max_size = var.max_size
 
     tag {
         key = "${var.cluster_name}"
@@ -142,4 +142,14 @@ data "template_file" "user_data" {
         db_address = data.terraform_remote_state.db.outputs.address
         db_port = data.terraform_remote_state.db.outputs.port
     }
+}
+
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+      bucket = var.db_remote_state_bucket
+      key = var.db_remote_state_key
+      region = "us-east-2"
+  }
 }
