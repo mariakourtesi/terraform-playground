@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "webserver_cluster" {
-    source = "../../../modules/services/webserver-cluster"
+    source = "https://github.com/mariakourtesi/terraformmodulerepo/modules//webserver-cluster?ref=v0.0.1"
 
     cluster_name = "webservers-stage"
     db_remote_state_bucket = "marias_unique_bucket"
