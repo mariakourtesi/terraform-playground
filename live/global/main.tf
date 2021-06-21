@@ -3,6 +3,6 @@ provider "aws" {
 }
 
 resource "aws_iam_user" {
-    count = 3
-    name = var.user_names[count.index]
+    for_each = toset(var.user_names)
+    name = each.value
 }

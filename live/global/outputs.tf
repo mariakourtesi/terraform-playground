@@ -1,4 +1,7 @@
-output "all_arn" {
-    value = aws_user_names.example[*].arn
-    description = "The ARNs of all users"
+output "all_users" {
+    value = aws_user_names.example
+}
+
+output "all_arns" {
+    value = values(aws_user_names.example)[*].arn
 }
